@@ -10,21 +10,26 @@ ci-cd-gruppexamination/
 │       ├── deploy-frontend.yml    # Frontend → AWS S3 deployment
 │       └── deploy-backend.yml     # Backend → Docker Hub → Render
 │
-├── frontend/                      # React frontend
+├── frontend/                      # React frontend (TypeScript)
 │   ├── public/
 │   │   └── index.html
 │   ├── src/
-│   │   ├── App.js
+│   │   ├── App.tsx
 │   │   ├── App.css
-│   │   ├── index.js
-│   │   └── index.css
+│   │   ├── index.tsx
+│   │   ├── index.css
+│   │   └── react-app-env.d.ts
+│   ├── tsconfig.json              # TypeScript config
 │   ├── package.json
 │   └── README.md
 │
-├── backend/                       # Express.js backend
+├── backend/                       # Express.js backend (TypeScript)
+│   ├── src/
+│   │   └── server.ts              # Main server file
 │   ├── Dockerfile                 # Docker image definition
 │   ├── .dockerignore
-│   ├── server.js                  # Main server file
+│   ├── tsconfig.json              # TypeScript config
+│   ├── nodemon.json               # Nodemon config för dev
 │   ├── package.json
 │   └── README.md
 │

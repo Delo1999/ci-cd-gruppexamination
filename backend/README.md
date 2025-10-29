@@ -1,6 +1,6 @@
 # Backend - Meetup App API
 
-Express.js backend för meetup-applikationen.
+Express.js backend för meetup-applikationen, byggd med TypeScript.
 
 ## Lokal utveckling
 
@@ -15,13 +15,29 @@ Express.js backend för meetup-applikationen.
 npm install
 ```
 
-### Kör lokalt
+### Kör lokalt (development mode med hot reload)
 
 ```bash
 npm run dev
 ```
 
+Detta använder `ts-node` och `nodemon` för att köra TypeScript direkt utan att behöva bygga först.
+
 Servern körs på `http://localhost:3000`
+
+### Bygga för produktion
+
+```bash
+npm run build
+```
+
+Detta kompilerar TypeScript till JavaScript i `dist/` mappen.
+
+### Kör compiled version
+
+```bash
+npm start
+```
 
 ### Miljövariabler
 
@@ -41,11 +57,34 @@ DATABASE_URL=your_database_connection_string
 docker build -t meetup-app-backend .
 ```
 
+Dockerfile bygger automatiskt TypeScript och kör den compiled versionen.
+
 ### Kör Docker container
 
 ```bash
 docker run -p 3000:3000 --env-file .env meetup-app-backend
 ```
+
+## Projektstruktur
+
+```
+backend/
+├── src/
+│   └── server.ts         # Main server file (TypeScript)
+├── dist/                  # Compiled JavaScript (genereras vid build)
+├── tsconfig.json          # TypeScript konfiguration
+├── nodemon.json           # Nodemon konfiguration för dev mode
+├── Dockerfile             # Docker build config
+└── package.json
+```
+
+## TypeScript
+
+Projektet använder TypeScript för bättre type safety och utvecklarupplevelse.
+
+- Source kod ligger i `src/`
+- Compiled JavaScript hamnar i `dist/` (ignoreras av git)
+- TypeScript config i `tsconfig.json`
 
 ## API Endpoints
 
@@ -61,6 +100,6 @@ Backend deployas automatiskt till Render när pull requests mergas till `main` b
 
 Deployment sker via:
 
-1. GitHub Actions bygger Docker image
+1. GitHub Actions bygger Docker image (kompilerar TypeScript)
 2. Image pushas till Docker Hub
 3. Render deployar automatiskt via webhook

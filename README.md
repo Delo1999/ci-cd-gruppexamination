@@ -87,8 +87,8 @@ Se README-filer i respektive mapp för instruktioner.
 
 ## Teknisk stack
 
-- **Frontend**: React
-- **Backend**: Express.js
+- **Frontend**: React med TypeScript
+- **Backend**: Express.js med TypeScript
 - **Database**: PostgreSQL (Render) eller MongoDB
 - **Containerization**: Docker
 - **CI/CD**: GitHub Actions

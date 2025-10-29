@@ -56,13 +56,22 @@ Deployment sker via GitHub Actions workflow som:
 ```
 frontend/
 ├── public/           # Statiska filer
-├── src/              # React komponenter och kod
+├── src/              # React komponenter och kod (TypeScript)
 │   ├── components/   # Reusable komponenter
 │   ├── pages/        # Sid-komponenter
 │   ├── services/     # API calls
-│   ├── App.js        # Main app component
-│   └── index.js      # Entry point
+│   ├── App.tsx       # Main app component
+│   ├── index.tsx     # Entry point
+├── tsconfig.json     # TypeScript konfiguration
 └── package.json
 ```
+
+## TypeScript
+
+Projektet använder TypeScript för bättre type safety och utvecklarupplevelse.
+
+- React komponenter är `.tsx` filer
+- Utility funktioner kan vara `.ts` filer
+- TypeScript config i `tsconfig.json`
 
 Ytterligare struktur kommer att byggas ut när user stories implementeras.
