@@ -1,0 +1,63 @@
+name: Deploy Frontend to AWS S3
+
+on:
+    pull_request:
+        branches:
+            - main
+        paths:
+            - "frontend/**"
+            - ".github/workflows/deploy-frontend.yml"
+    push:
+        branches:
+            - main
+        paths:
+            - "frontend/**"
+            - ".github/workflows/deploy-frontend.yml"
+
+jobs:
+    deploy:
+        # Endast deploya när PR mergas till main, inte vid öppning/uppdatering av PR
+        if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true)
+
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+                  cache: "npm"
+                  cache-dependency-path: frontend/package-lock.json
+
+            - name: Install dependencies
+              working-directory: ./frontend
+              run: npm ci
+
+            - name: Build React app
+              working-directory: ./frontend
+              run: npm run build
+              env:
+                  REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL || 'http://localhost:3000/api' }}
+
+            - name: Configure AWS credentials
+              uses: aws-actions/configure-aws-credentials@v4
+              with:
+                  aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+                  aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+                  aws-region: ${{ secrets.AWS_REGION }}
+
+            - name: Deploy to S3
+              run: |
+                  aws s3 sync frontend/build/ s3://${{ secrets.AWS_S3_BUCKET_NAME }} --delete --exact-timestamps
+
+            - name: Invalidate CloudFront cache (optional)
+              if: env.CLOUDFRONT_DISTRIBUTION_ID != ''
+              env:
+                  CLOUDFRONT_DISTRIBUTION_ID: ${{ secrets.CLOUDFRONT_DISTRIBUTION_ID }}
+              run: |
+                  aws cloudfront create-invalidation \
+                    --distribution-id $CLOUDFRONT_DISTRIBUTION_ID \
+                    --paths "/*"
