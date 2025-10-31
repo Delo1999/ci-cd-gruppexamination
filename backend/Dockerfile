@@ -6,7 +6,7 @@ WORKDIR /app
 
 # Kopiera package files
 COPY package*.json ./
-RUN npm ci --only=production
+RUN npm ci --omit=dev
 
 # Stage 2: Build (om ni har TypeScript eller behöver builda)
 FROM node:20-alpine AS builder
@@ -28,8 +28,11 @@ RUN adduser --system --uid 1001 nodejs
 # Kopiera dependencies från deps stage
 COPY --from=deps /app/node_modules ./node_modules
 
-# Kopiera applikationskod
-COPY . .
+# Kopiera byggda filer från builder stage
+COPY --from=builder /app/dist ./dist
+
+# Kopiera package.json för att kunna köra appen
+COPY package*.json ./
 
 # Ändra ägare till non-root user
 RUN chown -R nodejs:nodejs /app
@@ -46,5 +49,5 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
 	CMD node -e "require('http').get('http://localhost:3000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
 # Starta applikationen
-CMD ["node", "server.js"]
+CMD ["node", "dist/server.js"]
 

@@ -72,15 +72,88 @@ npm start
 
 Lägg in dessa i **Settings > Secrets and variables > Actions**:
 
-- [ ] `DOCKER_HUB_USERNAME`
-- [ ] `DOCKER_HUB_TOKEN`
-- [ ] `RENDER_API_KEY`
-- [ ] `RENDER_SERVICE_ID`
-- [ ] `AWS_ACCESS_KEY_ID`
-- [ ] `AWS_SECRET_ACCESS_KEY`
-- [ ] `AWS_S3_BUCKET_NAME`
-- [ ] `AWS_REGION`
-- [ ] `REACT_APP_API_URL` (valfritt, för production API URL)
+### 🔐 Repository Secrets
+
+För känslig data (tokens, keys, credentials) - gå till **Repository secrets**:
+
+- [x] `DOCKER_HUB_TOKEN` - Docker Hub authentication token
+- [ ] `RENDER_API_KEY` - Render API key för deployment
+- [ ] `AWS_ACCESS_KEY_ID` - AWS access key
+- [ ] `AWS_SECRET_ACCESS_KEY` - AWS secret access key
+
+### 📝 Repository Variables
+
+För icke-känslig konfigurationsdata - gå till **Variables**:
+
+- [ ] `DOCKER_HUB_USERNAME` - Docker Hub användarnamn
+- [ ] `RENDER_SERVICE_ID` - Render service ID (hittas i Render dashboard)
+- [ ] `AWS_S3_BUCKET_NAME` - Namn på S3 bucket (t.ex. `meetup-app-frontend`)
+- [ ] `AWS_REGION` - AWS region (t.ex. `eu-north-1`)
+- [ ] `REACT_APP_API_URL` (valfritt) - Production API URL för frontend build
+
+> **Notera:** Secrets är krypterade och visas aldrig i logs. Variables kan ses i workflows men ändras inte ofta. Om ni har flera miljöer (staging/production) kan ni använda **Environment secrets/variables** istället.
+
+## 🔑 Steg-för-steg: Hämta Render Nycklar
+
+### Steg 1: Hämta Render API Key
+
+1. Gå till [render.com](https://render.com) och logga in
+2. Klicka på ditt **användarnamn** (övre högra hörnet) > **Account Settings**
+3. Scrolla ner till **API Keys**-sektionen
+4. Klicka på **Create API Key**
+5. Ge den ett namn (t.ex. "GitHub Actions")
+6. Klicka **Create Key**
+7. **Kopiera nyckeln direkt** (du kan bara se den en gång!)
+8. Lägg in den i GitHub som **Repository Secret** med namnet `RENDER_API_KEY`
+
+### Steg 2: Skapa Render Web Service
+
+Du behöver skapa en Web Service på Render för att kunna hämta Service ID:
+
+1. Gå till [Render Dashboard](https://dashboard.render.com)
+2. Klicka **New +** > **Web Service**
+3. Connect din GitHub repository:
+   - Klicka **Connect GitHub**
+   - Välj ditt repository
+   - Klicka **Connect**
+4. Konfigurera Web Service:
+   - **Name**: `meetup-app-backend` (eller valfritt namn)
+   - **Environment**: Välj **Docker**
+   - **Dockerfile Path**: `./backend/Dockerfile`
+   - **Branch**: `main`
+   - **Auto-Deploy**: **Yes**
+5. Scrolla ner till **Environment Variables** och lägg till:
+   - `NODE_ENV` = `production`
+   - `PORT` = `10000` (Render tilldelar port automatiskt, men detta är standard)
+   - `DATABASE_URL` = Kopiera **Internal Database URL** från din PostgreSQL databas (från Render Dashboard > din databas > Connection info)
+6. Klicka **Create Web Service**
+7. Render kommer börja bygga din service (det kan ta några minuter)
+
+### Steg 3: Hämta Render Service ID
+
+1. När din Web Service är skapad, gå till din service i Render Dashboard
+2. Klicka på din service (`meetup-app-backend`)
+3. Titta i adressfältet - URL:en ser ut så här:
+   ```
+   https://dashboard.render.com/web/YOUR_SERVICE_ID
+   ```
+4. **Service ID** är den långa alfanumeriska strängen efter `/web/`
+   - T.ex. om URL:en är `https://dashboard.render.com/web/srv-abc123xyz456`
+   - Då är `srv-abc123xyz456` ditt Service ID
+5. Alternativt: Gå till **Settings** i din service och scrolla ner till **Info** - Service ID finns där också
+6. Lägg in Service ID i GitHub som **Repository Variable** med namnet `RENDER_SERVICE_ID`
+
+### Steg 4: Koppla Database till Web Service
+
+1. Gå till din PostgreSQL databas i Render Dashboard
+2. Kopiera **Internal Database URL** (inte External - Internal är vad som används i Render)
+3. Gå till din Web Service > **Environment**
+4. Lägg till environment variable:
+   - **Key**: `DATABASE_URL`
+   - **Value**: Klistra in din Internal Database URL
+5. Klicka **Save Changes**
+
+> **Tips:** Om du har redan skapat din databas, kan du också koppla den direkt från databas-sidan genom att klicka på **Connect** och välja din Web Service.
 
 ## 🔧 Branch Protection Setup
 
