@@ -1,6 +1,6 @@
 # Dependencies
 node_modules/
-package-lock.json
+# package-lock.json  # Behövs för npm ci i Docker builds - commita den!
 yarn.lock
 pnpm-lock.yaml
 
