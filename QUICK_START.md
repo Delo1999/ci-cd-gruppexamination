@@ -119,7 +119,8 @@ Du behöver skapa en Web Service på Render för att kunna hämta Service ID:
 4. Konfigurera Web Service:
    - **Name**: `meetup-app-backend` (eller valfritt namn)
    - **Environment**: Välj **Docker**
-   - **Dockerfile Path**: `./backend/Dockerfile`
+   - **Root Directory**: `backend` (⚠️ VIKTIGT! Detta sätter build context till backend-mappen)
+   - **Dockerfile Path**: `Dockerfile` (eller `./Dockerfile` - relativa till Root Directory)
    - **Branch**: `main`
    - **Auto-Deploy**: **Yes**
 5. Scrolla ner till **Environment Variables** och lägg till:
@@ -128,6 +129,8 @@ Du behöver skapa en Web Service på Render för att kunna hämta Service ID:
    - `DATABASE_URL` = Kopiera **Internal Database URL** från din PostgreSQL databas (från Render Dashboard > din databas > Connection info)
 6. Klicka **Create Web Service**
 7. Render kommer börja bygga din service (det kan ta några minuter)
+
+> **Om du redan har skapat din service:** Gå till din service → **Settings** → scrolla ner till **Build**-sektionen → ändra **Root Directory** till `backend` och **Dockerfile Path** till `Dockerfile` → **Save Changes** → starta en ny build.
 
 ### Steg 3: Hämta Render Service ID
 
