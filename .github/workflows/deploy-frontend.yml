@@ -25,6 +25,55 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v4
 
+            - name: Validate and set variables
+              id: validate
+              run: |
+                  echo "=== Validating Variables ==="
+                  BUCKET_NAME="${{ vars.AWS_S3_BUCKET_NAME }}"
+                  REGION_NAME="${{ vars.AWS_REGION }}"
+
+                  echo "Raw BUCKET_NAME from vars: '$BUCKET_NAME'"
+                  echo "Raw REGION_NAME from vars: '$REGION_NAME'"
+
+                  if [ -z "$BUCKET_NAME" ] || [ "$BUCKET_NAME" = "" ] || [ "$BUCKET_NAME" = "null" ]; then
+                      echo "❌ FATAL ERROR: AWS_S3_BUCKET_NAME variable is NOT SET!"
+                      echo ""
+                      echo "HOW TO FIX:"
+                      echo "1. Go to: GitHub repo → Settings → Secrets and variables → Actions"
+                      echo "2. Click on 'Variables' tab (NOT Secrets!)"
+                      echo "3. Click 'New repository variable'"
+                      echo "4. Name: AWS_S3_BUCKET_NAME"
+                      echo "5. Value: ci-cd-gruppexamination (just the name, no ARN)"
+                      echo "6. Click 'Add variable'"
+                      echo ""
+                      exit 1
+                  fi
+
+                  if [ -z "$REGION_NAME" ] || [ "$REGION_NAME" = "" ] || [ "$REGION_NAME" = "null" ]; then
+                      echo "❌ FATAL ERROR: AWS_REGION variable is NOT SET!"
+                      echo ""
+                      echo "HOW TO FIX:"
+                      echo "1. Go to: GitHub repo → Settings → Secrets and variables → Actions"
+                      echo "2. Click on 'Variables' tab (NOT Secrets!)"
+                      echo "3. Click 'New repository variable'"
+                      echo "4. Name: AWS_REGION"
+                      echo "5. Value: eu-north-1 (or your AWS region)"
+                      echo "6. Click 'Add variable'"
+                      echo ""
+                      exit 1
+                  fi
+
+                  # Remove any whitespace
+                  BUCKET_NAME=$(echo "$BUCKET_NAME" | xargs)
+                  REGION_NAME=$(echo "$REGION_NAME" | xargs)
+
+                  echo "✅ Bucket name: '$BUCKET_NAME'"
+                  echo "✅ Region: '$REGION_NAME'"
+                  echo ""
+                  echo "BUCKET_NAME=$BUCKET_NAME" >> $GITHUB_ENV
+                  echo "AWS_REGION=$REGION_NAME" >> $GITHUB_ENV
+                  echo "=========================="
+
             - name: Setup Node.js
               uses: actions/setup-node@v4
               with:
@@ -34,7 +83,7 @@ jobs:
 
             - name: Install dependencies
               working-directory: ./frontend
-              run: npm ci
+              run: npm install --legacy-peer-deps
 
             - name: Build React app
               working-directory: ./frontend
@@ -47,11 +96,22 @@ jobs:
               with:
                   aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
                   aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-                  aws-region: ${{ secrets.AWS_REGION }}
+                  aws-region: ${{ vars.AWS_REGION }}
 
             - name: Deploy to S3
               run: |
-                  aws s3 sync frontend/build/ s3://${{ secrets.AWS_S3_BUCKET_NAME }} --delete --exact-timestamps
+                  echo "=== Deploying to S3 ==="
+
+                  echo "Bucket name: $BUCKET_NAME"
+                  echo "Region: $AWS_REGION"
+                  echo ""
+                  echo "Running: aws s3 sync frontend/build/ s3://$BUCKET_NAME --delete --exact-timestamps"
+
+                  # Deploy to S3
+                  aws s3 sync frontend/build/ s3://$BUCKET_NAME --delete --exact-timestamps
+
+                  echo ""
+                  echo "✅ Deployment complete to bucket: $BUCKET_NAME"
 
             - name: Invalidate CloudFront cache (optional)
               if: env.CLOUDFRONT_DISTRIBUTION_ID != ''
