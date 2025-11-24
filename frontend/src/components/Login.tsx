@@ -1,14 +1,13 @@
 import React, { useState } from "react";
 import "./Register.css";
 
-interface RegisterProps {
-  onRegisterSuccess?: () => void;
+interface LoginProps {
+  onLoginSuccess?: (user: { id: number; email: string }) => void;
 }
 
-const Register: React.FC<RegisterProps> = ({ onRegisterSuccess }) => {
+const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState<"success" | "error" | "">("");
   const [isLoading, setIsLoading] = useState(false);
@@ -20,15 +19,8 @@ const Register: React.FC<RegisterProps> = ({ onRegisterSuccess }) => {
     setMessage("");
     setMessageType("");
 
-    // Validation
-    if (!email || !password || !confirmPassword) {
-      setMessage("Alla fält måste fyllas i");
-      setMessageType("error");
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      setMessage("Lösenorden matchar inte");
+    if (!email || !password) {
+      setMessage("E-post och lösenord krävs");
       setMessageType("error");
       return;
     }
@@ -36,7 +28,7 @@ const Register: React.FC<RegisterProps> = ({ onRegisterSuccess }) => {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${apiUrl}/register`, {
+      const response = await fetch(`${apiUrl}/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -47,28 +39,22 @@ const Register: React.FC<RegisterProps> = ({ onRegisterSuccess }) => {
       const data = await response.json();
 
       if (response.ok) {
-        setMessage(
-          data.message || "Registrering lyckades! Du kan nu logga in."
-        );
+        setMessage(data.message || "Inloggning lyckades!");
         setMessageType("success");
-        // Reset form
-        setEmail("");
         setPassword("");
-        setConfirmPassword("");
 
-        // Call success callback if provided
-        if (onRegisterSuccess) {
+        if (onLoginSuccess) {
           setTimeout(() => {
-            onRegisterSuccess();
-          }, 2000);
+            onLoginSuccess(data.user);
+          }, 300);
         }
       } else {
-        setMessage(data.error || "Registrering misslyckades. Försök igen.");
+        setMessage(data.error || "Inloggning misslyckades. Försök igen.");
         setMessageType("error");
       }
     } catch (error) {
-      console.error("Registration error:", error);
-      setMessage("Ett fel uppstod. Kontrollera att backend är igång...");
+      console.error("Login error:", error);
+      setMessage("Ett fel uppstod. Kontrollera att backend är igång.");
       setMessageType("error");
     } finally {
       setIsLoading(false);
@@ -78,13 +64,13 @@ const Register: React.FC<RegisterProps> = ({ onRegisterSuccess }) => {
   return (
     <div className="register-container">
       <div className="register-box">
-        <h2>Registrera dig</h2>
+        <h2>Logga in</h2>
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label htmlFor="email">E-postadress</label>
+            <label htmlFor="login-email">E-postadress</label>
             <input
               type="email"
-              id="email"
+              id="login-email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="din@email.com"
@@ -93,26 +79,13 @@ const Register: React.FC<RegisterProps> = ({ onRegisterSuccess }) => {
             />
           </div>
           <div className="form-group">
-            <label htmlFor="password">Lösenord</label>
+            <label htmlFor="login-password">Lösenord</label>
             <input
               type="password"
-              id="password"
+              id="login-password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Minst 6 tecken"
-              required
-              minLength={6}
-              disabled={isLoading}
-            />
-          </div>
-          <div className="form-group">
-            <label htmlFor="confirmPassword">Bekräfta lösenord</label>
-            <input
-              type="password"
-              id="confirmPassword"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Upprepa lösenordet"
+              placeholder="Ditt lösenord"
               required
               minLength={6}
               disabled={isLoading}
@@ -120,11 +93,11 @@ const Register: React.FC<RegisterProps> = ({ onRegisterSuccess }) => {
           </div>
           {message && <div className={`message ${messageType}`}>{message}</div>}
           <button
-            type="submit"
             className="register-button"
+            type="submit"
             disabled={isLoading}
           >
-            {isLoading ? "Registrerar..." : "Registrera"}
+            {isLoading ? "Loggar in..." : "Logga in"}
           </button>
         </form>
       </div>
@@ -132,4 +105,4 @@ const Register: React.FC<RegisterProps> = ({ onRegisterSuccess }) => {
   );
 };
 
-export default Register;
+export default Login;
