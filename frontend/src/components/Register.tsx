@@ -68,7 +68,7 @@ const Register: React.FC<RegisterProps> = ({ onRegisterSuccess }) => {
       }
     } catch (error) {
       console.error("Registration error:", error);
-      setMessage("Ett fel uppstod. Kontrollera att backend är igång.");
+      setMessage("Ett fel uppstod. Kontrollera att backend är igång...");
       setMessageType("error");
     } finally {
       setIsLoading(false);
