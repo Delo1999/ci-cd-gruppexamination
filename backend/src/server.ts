@@ -2,6 +2,7 @@ import express, { Request, Response, NextFunction } from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import { initializeDatabase, db } from "./db";
+import bcrypt from "bcryptjs";
 
 dotenv.config();
 
@@ -67,9 +68,10 @@ app.post("/api/register", async (req: Request, res: Response) => {
       });
     }
 
-    // Create new user in database
-    // Note: In production, password should be hashed with bcrypt before saving
-    const newUser = await db.createUser(email, password);
+    // Hash password before saving
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = await db.createUser(email, hashedPassword);
 
     // Return success (don't send password)
     res.status(201).json({
@@ -94,6 +96,53 @@ app.post("/api/register", async (req: Request, res: Response) => {
     res.status(500).json({
       error: "Ett fel uppstod vid registrering",
     });
+  }
+});
+
+// Login endpoint
+app.post("/api/login", async (req: Request, res: Response) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ error: "E-post och lösenord krävs" });
+    }
+
+    const user = await db.findUserByEmail(email);
+    if (!user) {
+      return res.status(401).json({ error: "Fel e-post eller lösenord" });
+    }
+
+    const storedPassword = user.password;
+    let isPasswordValid = false;
+
+    const isHashedPassword =
+      typeof storedPassword === "string" &&
+      (storedPassword.startsWith("$2a$") ||
+        storedPassword.startsWith("$2b$") ||
+        storedPassword.startsWith("$2y$"));
+
+    if (isHashedPassword) {
+      isPasswordValid = await bcrypt.compare(password, storedPassword);
+    } else {
+      isPasswordValid = password === storedPassword;
+    }
+
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: "Fel e-post eller lösenord" });
+    }
+
+    res.json({
+      message: "Inloggning lyckades!",
+      user: {
+        id: user.id,
+        email: user.email,
+        createdAt: user.created_at,
+      },
+    });
+  } catch (error) {
+    console.error("Login error:", error);
+    res.status(500).json({ error: "Ett fel uppstod vid inloggning" });
   }
 });
 
