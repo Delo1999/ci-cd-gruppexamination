@@ -13,7 +13,9 @@ const Register: React.FC<RegisterProps> = ({ onRegisterSuccess }) => {
   const [messageType, setMessageType] = useState<"success" | "error" | "">("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const apiUrl = process.env.REACT_APP_API_URL || "http://localhost:3000/api";
+  const apiUrl =
+    process.env.REACT_APP_API_URL ||
+    "https://ci-cd-gruppexamination-yq4y.onrender.com/api";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
