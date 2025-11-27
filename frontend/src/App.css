@@ -63,6 +63,43 @@
   border-radius: 8px;
 }
 
+.meetup-search {
+  margin-top: 30px;
+  width: 100%;
+  max-width: 900px;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.meetup-search label {
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.meetup-search input {
+  padding: 14px 18px;
+  border-radius: 12px;
+  border: none;
+  font-size: 16px;
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  outline: 2px solid transparent;
+  transition: outline 0.2s ease, background 0.2s ease;
+}
+
+.meetup-search input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.meetup-search input:focus {
+  outline: 2px solid #61dafb;
+  background: rgba(0, 0, 0, 0.35);
+}
+
 .meetup-section {
   margin-top: 40px;
   width: 100%;
@@ -142,6 +179,15 @@
 .meetup-card-button:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 20px rgba(97, 218, 251, 0.35);
+}
+
+.meetup-list-empty {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 40px;
+  border-radius: 16px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 18px;
 }
 
 .meetup-detail {
