@@ -1,3 +1,5 @@
+Frontend länk - http://ci-cd-gruppexamination.s3-website.eu-north-1.amazonaws.com/
+
 # CI/CD Gruppexamination - Meetup App
 
 Fullstack-applikation för att se och anmäla sig till meetups.
