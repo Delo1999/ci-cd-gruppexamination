@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import "./App.css";
 import Register from "./components/Register";
 import Login from "./components/Login";
@@ -43,6 +43,7 @@ const App: React.FC = () => {
     null
   );
   const [selectedMeetup, setSelectedMeetup] = useState<Meetup | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const handleRegisterSuccess = () => {
     setTimeout(() => {
@@ -58,6 +59,20 @@ const App: React.FC = () => {
   const handleLogout = () => {
     setLoggedInUser(null);
   };
+
+  const filteredMeetups = useMemo(() => {
+    const query = searchTerm.trim().toLowerCase();
+
+    if (!query) {
+      return upcomingMeetups;
+    }
+
+    return upcomingMeetups.filter((meetup) => {
+      const haystack =
+        `${meetup.title} ${meetup.description} ${meetup.location} ${meetup.host}`.toLowerCase();
+      return haystack.includes(query);
+    });
+  }, [searchTerm]);
 
   const renderContent = () => {
     if (activeView === "register") {
@@ -124,8 +139,19 @@ const App: React.FC = () => {
           </div>
         )}
 
+        <div className="meetup-search">
+          <label htmlFor="meetup-search-input">Sök meetups</label>
+          <input
+            id="meetup-search-input"
+            type="search"
+            placeholder="Sök efter nyckelord, ämnen eller platser..."
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+          />
+        </div>
+
         <MeetupList
-          meetups={upcomingMeetups}
+          meetups={filteredMeetups}
           onSelect={(meetup) => setSelectedMeetup(meetup)}
         />
       </>
