@@ -300,6 +300,28 @@
   margin-top: 8px;
 }
 
+.meetup-detail-actions {
+  margin-top: 24px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.unregister-button {
+  padding: 12px 24px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  background: transparent;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.unregister-button:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
 .registration-message {
   margin: 24px 0 0;
   padding: 16px 20px;
