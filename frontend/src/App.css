@@ -62,3 +62,117 @@
   padding: 20px;
   border-radius: 8px;
 }
+
+.meetup-section {
+  margin-top: 40px;
+  width: 100%;
+  max-width: 900px;
+  text-align: left;
+}
+
+.meetup-section-header {
+  margin-bottom: 24px;
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: 12px;
+  color: #61dafb;
+  margin-bottom: 8px;
+}
+
+.supporting-copy {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.meetup-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 20px;
+}
+
+.meetup-card {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 240px;
+}
+
+.meetup-card-body h3 {
+  margin: 8px 0;
+}
+
+.meetup-card-datetime {
+  font-size: 14px;
+  color: #61dafb;
+  margin: 0;
+}
+
+.meetup-card-description {
+  font-size: 16px;
+  margin: 8px 0 12px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.meetup-card-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.meetup-card-button {
+  margin-top: auto;
+  padding: 10px 20px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 600;
+  cursor: pointer;
+  background: #61dafb;
+  color: #1b1f2a;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.meetup-card-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(97, 218, 251, 0.35);
+}
+
+.meetup-detail {
+  width: 100%;
+  max-width: 900px;
+  text-align: left;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 40px;
+  border-radius: 24px;
+  position: relative;
+}
+
+.meetup-detail-grid {
+  margin-top: 30px;
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+
+.meetup-detail-card {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.meetup-detail-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.meetup-detail-card li + li {
+  margin-top: 8px;
+}

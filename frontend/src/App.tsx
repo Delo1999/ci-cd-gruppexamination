@@ -2,14 +2,47 @@ import React, { useState } from "react";
 import "./App.css";
 import Register from "./components/Register";
 import Login from "./components/Login";
+import MeetupList, { Meetup } from "./components/MeetupList";
+import MeetupDetail from "./components/MeetupDetail";
 
 type View = "home" | "register" | "login";
+
+const upcomingMeetups: Meetup[] = [
+  {
+    id: "meetup-1",
+    title: "Frontend Fika & Live Coding",
+    datetime: "12 december 2025 • 17:30",
+    location: "Folkuniversitetet, Stockholm",
+    host: "Evelina Berg",
+    description:
+      "Vi parar fika med live coding-sessioner där vi bygger UI-komponenter tillsammans och diskuterar bästa praxis.",
+  },
+  {
+    id: "meetup-2",
+    title: "DevOps Deep Dive",
+    datetime: "15 december 2025 • 18:00",
+    location: "Epicenter, Stockholm",
+    host: "Farid Khalil",
+    description:
+      "Kvällsevent med fokus på CI/CD, monitorering och hur du skalar pipelines i molnet.",
+  },
+  {
+    id: "meetup-3",
+    title: "Design Systems After Work",
+    datetime: "20 december 2025 • 16:00",
+    location: "Folkuniversitetet, Göteborg",
+    host: "Tove Lind",
+    description:
+      "Vi visar upp lokala design systems, pratar tokens och delar tips på hur man får produktteam att anamma dem.",
+  },
+];
 
 const App: React.FC = () => {
   const [activeView, setActiveView] = useState<View>("home");
   const [loggedInUser, setLoggedInUser] = useState<{ email: string } | null>(
     null
   );
+  const [selectedMeetup, setSelectedMeetup] = useState<Meetup | null>(null);
 
   const handleRegisterSuccess = () => {
     setTimeout(() => {
@@ -49,6 +82,15 @@ const App: React.FC = () => {
       );
     }
 
+    if (selectedMeetup) {
+      return (
+        <MeetupDetail
+          meetup={selectedMeetup}
+          onBack={() => setSelectedMeetup(null)}
+        />
+      );
+    }
+
     return (
       <>
         <h1>Meetup App</h1>
@@ -81,6 +123,11 @@ const App: React.FC = () => {
             </button>
           </div>
         )}
+
+        <MeetupList
+          meetups={upcomingMeetups}
+          onSelect={(meetup) => setSelectedMeetup(meetup)}
+        />
       </>
     );
   };
