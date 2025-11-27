@@ -31,6 +31,13 @@
   background-color: #21a9c7;
 }
 
+.register-button-home:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background-color: rgba(255, 255, 255, 0.3);
+  color: #282c34;
+}
+
 .back-button {
   position: absolute;
   top: 20px;
@@ -221,4 +228,24 @@
 
 .meetup-detail-card li + li {
   margin-top: 8px;
+}
+
+.registration-message {
+  margin: 24px 0 0;
+  padding: 16px 20px;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.registration-message-success {
+  background: rgba(67, 217, 145, 0.15);
+  border: 1px solid rgba(67, 217, 145, 0.35);
+  color: #d6ffe8;
+}
+
+.registration-message-error {
+  background: rgba(255, 99, 132, 0.15);
+  border: 1px solid rgba(255, 99, 132, 0.35);
+  color: #ffd6dd;
 }
