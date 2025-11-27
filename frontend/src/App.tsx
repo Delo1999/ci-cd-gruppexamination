@@ -4,14 +4,16 @@ import Register from "./components/Register";
 import Login from "./components/Login";
 import MeetupList, { Meetup, Review } from "./components/MeetupList";
 import MeetupDetail from "./components/MeetupDetail";
+import ProfilePanel from "./components/ProfilePanel";
 
-type View = "home" | "register" | "login";
+type View = "home" | "register" | "login" | "profile";
 
 const upcomingMeetups: Meetup[] = [
   {
     id: "meetup-1",
     title: "Frontend Fika & Live Coding",
     datetime: "12 december 2025 • 17:30",
+    dateISO: "2025-12-12T17:30:00+01:00",
     location: "Folkuniversitetet, Stockholm",
     host: "Evelina Berg",
     description:
@@ -39,6 +41,7 @@ const upcomingMeetups: Meetup[] = [
     id: "meetup-2",
     title: "DevOps Deep Dive",
     datetime: "15 december 2025 • 18:00",
+    dateISO: "2025-12-15T18:00:00+01:00",
     location: "Epicenter, Stockholm",
     host: "Farid Khalil",
     description:
@@ -60,6 +63,7 @@ const upcomingMeetups: Meetup[] = [
     id: "meetup-3",
     title: "Design Systems After Work",
     datetime: "20 december 2025 • 16:00",
+    dateISO: "2025-12-20T16:00:00+01:00",
     location: "Folkuniversitetet, Göteborg",
     host: "Tove Lind",
     description:
@@ -85,11 +89,13 @@ const App: React.FC = () => {
     null
   );
   const [selectedMeetup, setSelectedMeetup] = useState<Meetup | null>(null);
+  const [viewBeforeDetail, setViewBeforeDetail] = useState<View>("home");
   const [searchTerm, setSearchTerm] = useState("");
   const [registrationMessage, setRegistrationMessage] = useState<{
     type: "success" | "error";
     text: string;
   } | null>(null);
+  const [registeredMeetupIds, setRegisteredMeetupIds] = useState<string[]>([]);
   const [meetupReviews, setMeetupReviews] = useState<Record<string, Review[]>>(
     () =>
       upcomingMeetups.reduce((acc, meetup) => {
@@ -114,11 +120,12 @@ const App: React.FC = () => {
 
   const handleLoginSuccess = (user: { email: string }) => {
     setLoggedInUser(user);
-    setActiveView("home");
   };
 
   const handleLogout = () => {
     setLoggedInUser(null);
+    setRegisteredMeetupIds([]);
+    setActiveView("home");
   };
 
   const meetupsWithRegistrations = useMemo(
@@ -147,8 +154,10 @@ const App: React.FC = () => {
   }, [meetupsWithRegistrations, searchTerm]);
 
   const handleSelectMeetup = (meetup: Meetup) => {
+    setViewBeforeDetail(activeView);
     setSelectedMeetup(meetup);
     setRegistrationMessage(null);
+    setActiveView("home");
   };
 
   const handleRegisterForMeetup = (meetup: Meetup) => {
@@ -167,6 +176,11 @@ const App: React.FC = () => {
         type: "success",
         text: "Du är nu anmäld! Vi har skickat en bekräftelse till din e-post.",
       });
+      if (loggedInUser) {
+        setRegisteredMeetupIds((existing) =>
+          existing.includes(meetup.id) ? existing : [...existing, meetup.id]
+        );
+      }
 
       return {
         ...prev,
@@ -174,6 +188,30 @@ const App: React.FC = () => {
       };
     });
   };
+
+  const registeredMeetupDetails = useMemo(
+    () =>
+      meetupsWithRegistrations.filter((meetup) =>
+        registeredMeetupIds.includes(meetup.id)
+      ),
+    [meetupsWithRegistrations, registeredMeetupIds]
+  );
+
+  const { upcoming: upcomingRegistered, past: pastRegistered } = useMemo(() => {
+    const now = new Date();
+    return registeredMeetupDetails.reduce(
+      (acc, meetup) => {
+        const meetupDate = new Date(meetup.dateISO);
+        if (meetupDate.getTime() < now.getTime()) {
+          acc.past.push(meetup);
+        } else {
+          acc.upcoming.push(meetup);
+        }
+        return acc;
+      },
+      { upcoming: [] as Meetup[], past: [] as Meetup[] }
+    );
+  }, [registeredMeetupDetails]);
 
   const handleSubmitReview = (
     meetupId: string,
@@ -245,7 +283,20 @@ const App: React.FC = () => {
           onBack={() => {
             setSelectedMeetup(null);
             setRegistrationMessage(null);
+            setActiveView(viewBeforeDetail);
           }}
+        />
+      );
+    }
+
+    if (activeView === "profile") {
+      return (
+        <ProfilePanel
+          loggedInEmail={loggedInUser?.email ?? null}
+          upcoming={upcomingRegistered}
+          past={pastRegistered}
+          onSelect={handleSelectMeetup}
+          onBackHome={() => setActiveView("home")}
         />
       );
     }
@@ -262,9 +313,17 @@ const App: React.FC = () => {
         {loggedInUser ? (
           <div className="logged-in-info">
             <p>Inloggad som {loggedInUser.email}</p>
-            <button className="register-button-home" onClick={handleLogout}>
-              Logga ut
-            </button>
+            <div className="logged-in-actions">
+              <button
+                className="profile-link-button"
+                onClick={() => setActiveView("profile")}
+              >
+                Min profil
+              </button>
+              <button className="register-button-home" onClick={handleLogout}>
+                Logga ut
+              </button>
+            </div>
           </div>
         ) : (
           <div className="home-actions">
@@ -279,6 +338,12 @@ const App: React.FC = () => {
               onClick={() => setActiveView("login")}
             >
               Logga in
+            </button>
+            <button
+              className="profile-link-button secondary"
+              onClick={() => setActiveView("profile")}
+            >
+              Min profil
             </button>
           </div>
         )}

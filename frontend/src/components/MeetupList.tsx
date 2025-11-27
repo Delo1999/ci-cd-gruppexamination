@@ -12,6 +12,7 @@ export type Meetup = {
   id: string;
   title: string;
   datetime: string;
+  dateISO: string;
   location: string;
   host: string;
   description: string;
