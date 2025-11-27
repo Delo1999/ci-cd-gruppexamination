@@ -13,6 +13,8 @@ type MeetupDetailProps = {
     comment: string;
   }) => void;
   onRegister: () => void;
+  onUnregister?: () => void;
+  isRegistered?: boolean;
   onBack: () => void;
 };
 
@@ -24,6 +26,8 @@ const MeetupDetail: React.FC<MeetupDetailProps> = ({
   reviews,
   onSubmitReview,
   onRegister,
+  onUnregister,
+  isRegistered = false,
   onBack,
 }) => {
   const [isReviewFormOpen, setIsReviewFormOpen] = useState(false);
@@ -123,13 +127,20 @@ const MeetupDetail: React.FC<MeetupDetailProps> = ({
         </div>
       )}
 
-      <button
-        className="register-button-home"
-        onClick={onRegister}
-        disabled={isFull}
-      >
-        {isFull ? "Fullbokad" : "Anmäl dig"}
-      </button>
+      <div className="meetup-detail-actions">
+        <button
+          className="register-button-home"
+          onClick={onRegister}
+          disabled={isFull || isRegistered}
+        >
+          {isFull ? "Fullbokad" : isRegistered ? "Redan anmäld" : "Anmäl dig"}
+        </button>
+        {isRegistered && onUnregister && (
+          <button className="unregister-button" onClick={onUnregister}>
+            Avregistrera
+          </button>
+        )}
+      </div>
 
       <section className="review-section">
         <div className="review-section-header">
