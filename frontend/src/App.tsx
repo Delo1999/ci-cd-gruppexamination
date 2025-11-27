@@ -15,6 +15,8 @@ const upcomingMeetups: Meetup[] = [
     datetime: "12 december 2025 • 17:30",
     dateISO: "2025-12-12T17:30:00+01:00",
     location: "Folkuniversitetet, Stockholm",
+    city: "Stockholm",
+    category: "Frontend",
     host: "Evelina Berg",
     description:
       "Vi parar fika med live coding-sessioner där vi bygger UI-komponenter tillsammans och diskuterar bästa praxis.",
@@ -43,6 +45,8 @@ const upcomingMeetups: Meetup[] = [
     datetime: "15 december 2025 • 18:00",
     dateISO: "2025-12-15T18:00:00+01:00",
     location: "Epicenter, Stockholm",
+    city: "Stockholm",
+    category: "DevOps",
     host: "Farid Khalil",
     description:
       "Kvällsevent med fokus på CI/CD, monitorering och hur du skalar pipelines i molnet.",
@@ -65,6 +69,8 @@ const upcomingMeetups: Meetup[] = [
     datetime: "20 december 2025 • 16:00",
     dateISO: "2025-12-20T16:00:00+01:00",
     location: "Folkuniversitetet, Göteborg",
+    city: "Göteborg",
+    category: "Design",
     host: "Tove Lind",
     description:
       "Vi visar upp lokala design systems, pratar tokens och delar tips på hur man får produktteam att anamma dem.",
@@ -91,6 +97,12 @@ const App: React.FC = () => {
   const [selectedMeetup, setSelectedMeetup] = useState<Meetup | null>(null);
   const [viewBeforeDetail, setViewBeforeDetail] = useState<View>("home");
   const [searchTerm, setSearchTerm] = useState("");
+  const [filters, setFilters] = useState({
+    dateFrom: "",
+    dateTo: "",
+    city: "",
+    category: "",
+  });
   const [registrationMessage, setRegistrationMessage] = useState<{
     type: "success" | "error";
     text: string;
@@ -139,19 +151,60 @@ const App: React.FC = () => {
     [meetupRegistrations, meetupReviews]
   );
 
+  const availableCities = useMemo(
+    () =>
+      Array.from(
+        new Set(meetupsWithRegistrations.map((meetup) => meetup.city))
+      ).sort(),
+    [meetupsWithRegistrations]
+  );
+
+  const availableCategories = useMemo(
+    () =>
+      Array.from(
+        new Set(meetupsWithRegistrations.map((meetup) => meetup.category))
+      ).sort(),
+    [meetupsWithRegistrations]
+  );
+
   const filteredMeetups = useMemo(() => {
     const query = searchTerm.trim().toLowerCase();
-
-    if (!query) {
-      return meetupsWithRegistrations;
-    }
+    const fromDate = filters.dateFrom
+      ? new Date(`${filters.dateFrom}T00:00:00`)
+      : null;
+    const toDate = filters.dateTo
+      ? new Date(`${filters.dateTo}T23:59:59`)
+      : null;
 
     return meetupsWithRegistrations.filter((meetup) => {
       const haystack =
         `${meetup.title} ${meetup.description} ${meetup.location} ${meetup.host}`.toLowerCase();
-      return haystack.includes(query);
+
+      if (query && !haystack.includes(query)) {
+        return false;
+      }
+
+      if (filters.city && meetup.city !== filters.city) {
+        return false;
+      }
+
+      if (filters.category && meetup.category !== filters.category) {
+        return false;
+      }
+
+      const meetupDate = new Date(meetup.dateISO);
+
+      if (fromDate && meetupDate < fromDate) {
+        return false;
+      }
+
+      if (toDate && meetupDate > toDate) {
+        return false;
+      }
+
+      return true;
     });
-  }, [meetupsWithRegistrations, searchTerm]);
+  }, [filters, meetupsWithRegistrations, searchTerm]);
 
   const handleSelectMeetup = (meetup: Meetup) => {
     setViewBeforeDetail(activeView);
@@ -186,6 +239,22 @@ const App: React.FC = () => {
         ...prev,
         [meetup.id]: currentRegistrations + 1,
       };
+    });
+  };
+
+  const handleFilterChange = (field: keyof typeof filters, value: string) => {
+    setFilters((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
+  const handleResetFilters = () => {
+    setFilters({
+      dateFrom: "",
+      dateTo: "",
+      city: "",
+      category: "",
     });
   };
 
@@ -357,6 +426,77 @@ const App: React.FC = () => {
             value={searchTerm}
             onChange={(event) => setSearchTerm(event.target.value)}
           />
+        </div>
+
+        <div className="meetup-filters">
+          <div className="filter-group">
+            <label htmlFor="filter-date-from">Datum från</label>
+            <input
+              id="filter-date-from"
+              type="date"
+              value={filters.dateFrom}
+              onChange={(event) =>
+                handleFilterChange("dateFrom", event.target.value)
+              }
+            />
+          </div>
+          <div className="filter-group">
+            <label htmlFor="filter-date-to">Datum till</label>
+            <input
+              id="filter-date-to"
+              type="date"
+              value={filters.dateTo}
+              onChange={(event) =>
+                handleFilterChange("dateTo", event.target.value)
+              }
+            />
+          </div>
+          <div className="filter-group">
+            <label htmlFor="filter-city">Plats</label>
+            <select
+              id="filter-city"
+              value={filters.city}
+              onChange={(event) =>
+                handleFilterChange("city", event.target.value)
+              }
+            >
+              <option value="">Alla platser</option>
+              {availableCities.map((city) => (
+                <option key={city} value={city}>
+                  {city}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="filter-group">
+            <label htmlFor="filter-category">Kategori</label>
+            <select
+              id="filter-category"
+              value={filters.category}
+              onChange={(event) =>
+                handleFilterChange("category", event.target.value)
+              }
+            >
+              <option value="">Alla kategorier</option>
+              {availableCategories.map((category) => (
+                <option key={category} value={category}>
+                  {category}
+                </option>
+              ))}
+            </select>
+          </div>
+          <button
+            className="filter-reset-button"
+            onClick={handleResetFilters}
+            disabled={
+              !filters.dateFrom &&
+              !filters.dateTo &&
+              !filters.city &&
+              !filters.category
+            }
+          >
+            Rensa filter
+          </button>
         </div>
 
         <MeetupList meetups={filteredMeetups} onSelect={handleSelectMeetup} />
