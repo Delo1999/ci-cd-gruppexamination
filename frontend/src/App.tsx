@@ -16,6 +16,8 @@ const upcomingMeetups: Meetup[] = [
     host: "Evelina Berg",
     description:
       "Vi parar fika med live coding-sessioner där vi bygger UI-komponenter tillsammans och diskuterar bästa praxis.",
+    capacity: 40,
+    registrations: 28,
   },
   {
     id: "meetup-2",
@@ -25,6 +27,8 @@ const upcomingMeetups: Meetup[] = [
     host: "Farid Khalil",
     description:
       "Kvällsevent med fokus på CI/CD, monitorering och hur du skalar pipelines i molnet.",
+    capacity: 35,
+    registrations: 35,
   },
   {
     id: "meetup-3",
@@ -34,6 +38,8 @@ const upcomingMeetups: Meetup[] = [
     host: "Tove Lind",
     description:
       "Vi visar upp lokala design systems, pratar tokens och delar tips på hur man får produktteam att anamma dem.",
+    capacity: 30,
+    registrations: 11,
   },
 ];
 
@@ -44,6 +50,18 @@ const App: React.FC = () => {
   );
   const [selectedMeetup, setSelectedMeetup] = useState<Meetup | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [registrationMessage, setRegistrationMessage] = useState<{
+    type: "success" | "error";
+    text: string;
+  } | null>(null);
+  const [meetupRegistrations, setMeetupRegistrations] = useState<
+    Record<string, number>
+  >(() =>
+    upcomingMeetups.reduce((acc, meetup) => {
+      acc[meetup.id] = meetup.registrations;
+      return acc;
+    }, {} as Record<string, number>)
+  );
 
   const handleRegisterSuccess = () => {
     setTimeout(() => {
@@ -60,19 +78,58 @@ const App: React.FC = () => {
     setLoggedInUser(null);
   };
 
+  const meetupsWithRegistrations = useMemo(
+    () =>
+      upcomingMeetups.map((meetup) => ({
+        ...meetup,
+        registrations:
+          meetupRegistrations[meetup.id] ?? meetup.registrations ?? 0,
+      })),
+    [meetupRegistrations]
+  );
+
   const filteredMeetups = useMemo(() => {
     const query = searchTerm.trim().toLowerCase();
 
     if (!query) {
-      return upcomingMeetups;
+      return meetupsWithRegistrations;
     }
 
-    return upcomingMeetups.filter((meetup) => {
+    return meetupsWithRegistrations.filter((meetup) => {
       const haystack =
         `${meetup.title} ${meetup.description} ${meetup.location} ${meetup.host}`.toLowerCase();
       return haystack.includes(query);
     });
-  }, [searchTerm]);
+  }, [meetupsWithRegistrations, searchTerm]);
+
+  const handleSelectMeetup = (meetup: Meetup) => {
+    setSelectedMeetup(meetup);
+    setRegistrationMessage(null);
+  };
+
+  const handleRegisterForMeetup = (meetup: Meetup) => {
+    setMeetupRegistrations((prev) => {
+      const currentRegistrations = prev[meetup.id] ?? meetup.registrations ?? 0;
+
+      if (currentRegistrations >= meetup.capacity) {
+        setRegistrationMessage({
+          type: "error",
+          text: "Denna meetup är tyvärr fullbokad.",
+        });
+        return prev;
+      }
+
+      setRegistrationMessage({
+        type: "success",
+        text: "Du är nu anmäld! Vi har skickat en bekräftelse till din e-post.",
+      });
+
+      return {
+        ...prev,
+        [meetup.id]: currentRegistrations + 1,
+      };
+    });
+  };
 
   const renderContent = () => {
     if (activeView === "register") {
@@ -98,10 +155,27 @@ const App: React.FC = () => {
     }
 
     if (selectedMeetup) {
+      const meetupFromState =
+        meetupsWithRegistrations.find(
+          (meetup) => meetup.id === selectedMeetup.id
+        ) ?? selectedMeetup;
+      const spotsLeft = Math.max(
+        meetupFromState.capacity - meetupFromState.registrations,
+        0
+      );
+      const isFull = spotsLeft === 0;
+
       return (
         <MeetupDetail
-          meetup={selectedMeetup}
-          onBack={() => setSelectedMeetup(null)}
+          meetup={meetupFromState}
+          spotsLeft={spotsLeft}
+          isFull={isFull}
+          registrationMessage={registrationMessage}
+          onRegister={() => handleRegisterForMeetup(meetupFromState)}
+          onBack={() => {
+            setSelectedMeetup(null);
+            setRegistrationMessage(null);
+          }}
         />
       );
     }
@@ -150,10 +224,7 @@ const App: React.FC = () => {
           />
         </div>
 
-        <MeetupList
-          meetups={filteredMeetups}
-          onSelect={(meetup) => setSelectedMeetup(meetup)}
-        />
+        <MeetupList meetups={filteredMeetups} onSelect={handleSelectMeetup} />
       </>
     );
   };
