@@ -14,10 +14,12 @@ export type Meetup = {
   datetime: string;
   dateISO: string;
   location: string;
+  city: string;
   host: string;
   description: string;
   capacity: number;
   registrations: number;
+  category: string;
   reviews?: Review[];
 };
 
