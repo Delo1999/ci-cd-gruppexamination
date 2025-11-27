@@ -242,6 +242,27 @@ const App: React.FC = () => {
     });
   };
 
+  const handleUnregisterFromMeetup = (meetup: Meetup) => {
+    setMeetupRegistrations((prev) => {
+      const currentRegistrations = prev[meetup.id] ?? meetup.registrations ?? 0;
+      const nextValue = Math.max(currentRegistrations - 1, 0);
+
+      setRegistrationMessage({
+        type: "success",
+        text: "Du är avregistrerad och platsen är släppt till kön.",
+      });
+
+      return {
+        ...prev,
+        [meetup.id]: nextValue,
+      };
+    });
+
+    setRegisteredMeetupIds((existing) =>
+      existing.filter((id) => id !== meetup.id)
+    );
+  };
+
   const handleFilterChange = (field: keyof typeof filters, value: string) => {
     setFilters((prev) => ({
       ...prev,
@@ -337,6 +358,7 @@ const App: React.FC = () => {
         0
       );
       const isFull = spotsLeft === 0;
+      const isRegistered = registeredMeetupIds.includes(meetupFromState.id);
 
       return (
         <MeetupDetail
@@ -349,6 +371,12 @@ const App: React.FC = () => {
             handleSubmitReview(meetupFromState.id, review)
           }
           onRegister={() => handleRegisterForMeetup(meetupFromState)}
+          onUnregister={
+            isRegistered
+              ? () => handleUnregisterFromMeetup(meetupFromState)
+              : undefined
+          }
+          isRegistered={isRegistered}
           onBack={() => {
             setSelectedMeetup(null);
             setRegistrationMessage(null);
