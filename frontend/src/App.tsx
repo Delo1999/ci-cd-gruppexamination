@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import "./App.css";
 import Register from "./components/Register";
 import Login from "./components/Login";
-import MeetupList, { Meetup } from "./components/MeetupList";
+import MeetupList, { Meetup, Review } from "./components/MeetupList";
 import MeetupDetail from "./components/MeetupDetail";
 
 type View = "home" | "register" | "login";
@@ -18,6 +18,22 @@ const upcomingMeetups: Meetup[] = [
       "Vi parar fika med live coding-sessioner där vi bygger UI-komponenter tillsammans och diskuterar bästa praxis.",
     capacity: 40,
     registrations: 28,
+    reviews: [
+      {
+        id: "review-1",
+        author: "Karin Holm",
+        rating: 5,
+        comment: "Väldigt inspirerande kväll och tydliga live coding-exempel.",
+        createdAt: "2025-11-10T17:00:00.000Z",
+      },
+      {
+        id: "review-2",
+        author: "Jonas Månsson",
+        rating: 4,
+        comment: "Bra energi men jag hade velat se mer om testning.",
+        createdAt: "2025-11-12T18:30:00.000Z",
+      },
+    ],
   },
   {
     id: "meetup-2",
@@ -29,6 +45,16 @@ const upcomingMeetups: Meetup[] = [
       "Kvällsevent med fokus på CI/CD, monitorering och hur du skalar pipelines i molnet.",
     capacity: 35,
     registrations: 35,
+    reviews: [
+      {
+        id: "review-3",
+        author: "Maya Rydberg",
+        rating: 5,
+        comment:
+          "Fick konkreta tips på hur vi kan korta ner våra releasecykler.",
+        createdAt: "2025-11-18T19:20:00.000Z",
+      },
+    ],
   },
   {
     id: "meetup-3",
@@ -40,6 +66,16 @@ const upcomingMeetups: Meetup[] = [
       "Vi visar upp lokala design systems, pratar tokens och delar tips på hur man får produktteam att anamma dem.",
     capacity: 30,
     registrations: 11,
+    reviews: [
+      {
+        id: "review-4",
+        author: "Elin Björk",
+        rating: 4,
+        comment:
+          "Kul att se praktiska exempel på tokens och naming-konventioner.",
+        createdAt: "2025-11-05T16:45:00.000Z",
+      },
+    ],
   },
 ];
 
@@ -54,6 +90,13 @@ const App: React.FC = () => {
     type: "success" | "error";
     text: string;
   } | null>(null);
+  const [meetupReviews, setMeetupReviews] = useState<Record<string, Review[]>>(
+    () =>
+      upcomingMeetups.reduce((acc, meetup) => {
+        acc[meetup.id] = meetup.reviews ?? [];
+        return acc;
+      }, {} as Record<string, Review[]>)
+  );
   const [meetupRegistrations, setMeetupRegistrations] = useState<
     Record<string, number>
   >(() =>
@@ -84,8 +127,9 @@ const App: React.FC = () => {
         ...meetup,
         registrations:
           meetupRegistrations[meetup.id] ?? meetup.registrations ?? 0,
+        reviews: meetupReviews[meetup.id] ?? meetup.reviews ?? [],
       })),
-    [meetupRegistrations]
+    [meetupRegistrations, meetupReviews]
   );
 
   const filteredMeetups = useMemo(() => {
@@ -131,6 +175,28 @@ const App: React.FC = () => {
     });
   };
 
+  const handleSubmitReview = (
+    meetupId: string,
+    reviewData: { author: string; rating: number; comment: string }
+  ) => {
+    setMeetupReviews((prev) => {
+      const newReview: Review = {
+        id: `review-${meetupId}-${Date.now()}`,
+        author: reviewData.author.trim() || "Anonym deltagare",
+        rating: reviewData.rating,
+        comment: reviewData.comment.trim(),
+        createdAt: new Date().toISOString(),
+      };
+
+      const currentReviews = prev[meetupId] ?? [];
+
+      return {
+        ...prev,
+        [meetupId]: [newReview, ...currentReviews],
+      };
+    });
+  };
+
   const renderContent = () => {
     if (activeView === "register") {
       return (
@@ -171,6 +237,10 @@ const App: React.FC = () => {
           spotsLeft={spotsLeft}
           isFull={isFull}
           registrationMessage={registrationMessage}
+          reviews={meetupFromState.reviews ?? []}
+          onSubmitReview={(review) =>
+            handleSubmitReview(meetupFromState.id, review)
+          }
           onRegister={() => handleRegisterForMeetup(meetupFromState)}
           onBack={() => {
             setSelectedMeetup(null);

@@ -249,3 +249,124 @@
   border: 1px solid rgba(255, 99, 132, 0.35);
   color: #ffd6dd;
 }
+
+.review-section {
+  margin-top: 40px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 20px;
+  padding: 32px;
+}
+
+.review-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.review-toggle-button {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  color: #fff;
+  padding: 10px 24px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.review-toggle-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.review-feedback {
+  margin: 16px 0 0;
+  font-weight: 600;
+  color: #d6ffe8;
+}
+
+.review-form {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.review-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.review-form input,
+.review-form select,
+.review-form textarea {
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  font-size: 16px;
+  outline: 2px solid transparent;
+  transition: outline 0.2s ease;
+}
+
+.review-form input:focus,
+.review-form select:focus,
+.review-form textarea:focus {
+  outline: 2px solid #61dafb;
+}
+
+.review-error {
+  color: #ffd6dd;
+  font-size: 14px;
+  margin: 0;
+}
+
+.review-list {
+  list-style: none;
+  padding: 0;
+  margin: 24px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.review-card {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-radius: 16px;
+  padding: 20px;
+}
+
+.review-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.review-author {
+  font-weight: 600;
+}
+
+.review-rating {
+  font-size: 18px;
+  color: #ffd54f;
+}
+
+.review-comment {
+  margin: 12px 0;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.review-date {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.6);
+}
