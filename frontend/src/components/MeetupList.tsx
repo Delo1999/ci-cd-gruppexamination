@@ -26,27 +26,34 @@ const MeetupList: React.FC<MeetupListProps> = ({ meetups, onSelect }) => {
         </p>
       </header>
 
-      <div className="meetup-list">
-        {meetups.map((meetup) => (
-          <article key={meetup.id} className="meetup-card">
-            <div className="meetup-card-body">
-              <p className="meetup-card-datetime">{meetup.datetime}</p>
-              <h3>{meetup.title}</h3>
-              <p className="meetup-card-description">{meetup.description}</p>
-              <div className="meetup-card-meta">
-                <span>📍 {meetup.location}</span>
-                <span>👤 {meetup.host}</span>
+      {meetups.length === 0 ? (
+        <div className="meetup-list-empty">
+          <p>Inga meetups matchar din sökning.</p>
+          <p>Justera dina nyckelord och försök igen.</p>
+        </div>
+      ) : (
+        <div className="meetup-list">
+          {meetups.map((meetup) => (
+            <article key={meetup.id} className="meetup-card">
+              <div className="meetup-card-body">
+                <p className="meetup-card-datetime">{meetup.datetime}</p>
+                <h3>{meetup.title}</h3>
+                <p className="meetup-card-description">{meetup.description}</p>
+                <div className="meetup-card-meta">
+                  <span>📍 {meetup.location}</span>
+                  <span>👤 {meetup.host}</span>
+                </div>
               </div>
-            </div>
-            <button
-              className="meetup-card-button"
-              onClick={() => onSelect(meetup)}
-            >
-              Visa mer
-            </button>
-          </article>
-        ))}
-      </div>
+              <button
+                className="meetup-card-button"
+                onClick={() => onSelect(meetup)}
+              >
+                Visa mer
+              </button>
+            </article>
+          ))}
+        </div>
+      )}
     </section>
   );
 };
