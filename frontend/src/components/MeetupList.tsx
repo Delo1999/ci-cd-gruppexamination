@@ -7,6 +7,8 @@ export type Meetup = {
   location: string;
   host: string;
   description: string;
+  capacity: number;
+  registrations: number;
 };
 
 type MeetupListProps = {
