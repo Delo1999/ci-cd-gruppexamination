@@ -1,5 +1,13 @@
 import React from "react";
 
+export type Review = {
+  id: string;
+  author: string;
+  rating: number;
+  comment: string;
+  createdAt: string;
+};
+
 export type Meetup = {
   id: string;
   title: string;
@@ -9,6 +17,7 @@ export type Meetup = {
   description: string;
   capacity: number;
   registrations: number;
+  reviews?: Review[];
 };
 
 type MeetupListProps = {
